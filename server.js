@@ -38,23 +38,33 @@ const bodyParser = require('body-parser');
 
 
 //템플릿 엔진 ejs 관련 코드 추가
-const db = require('node-mysql/lib/db');app.use(bodyParser.urlencoded({extended:true}));
+// const db = require('node-mysql/lib/db');app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
 
 
 // /list 요청 시 데이터 조회 코드
 app.get('/list', function(req, res){
-    // 몽고DB연결 시 주석 처리하기기
+    // 몽고DB연결 시 주석 처리하기
     // conn.query("select * from post", function (err, rows, fields) {
     //     if (err) throw err;
     //     console.log(rows);
     // });
-    mydb.collection('post').find().toArray(function(err, result){
+
+    // ejs 오류 코드
+    // mydb.collection('post').find().toArray(function(err, result){
+    //     console.log(result);       
+    //     // ejs 사용 코드
+    //     res.render('list.ejs', {data : result});
+    // })
+
+    mydb.collection('post').find().toArray().then(result=>{
         console.log(result);       
         // ejs 사용 코드
         res.render('list.ejs', {data : result});
     })
+});
+
     // ejs 사용 전 데이터베이스 연결 코드
     // res.sendFile(__dirname + '/list.html');
 
@@ -62,7 +72,7 @@ app.get('/list', function(req, res){
 
     // console.log('데이터베이스를 조회합니다.');
 
-});
+
 
 // '/enter' 요청에 대한 처리 루틴
 app.get('/enter', function(req, res){
@@ -95,3 +105,4 @@ app.post('/save', function(req, res){
 });
 
 // 서버 주소: http://localhost:8080/enter
+// http://localhost:8080/list

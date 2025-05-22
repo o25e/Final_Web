@@ -120,4 +120,8 @@ app.post("/delete", function (req, res){
             console.log('삭제완료');
             res.status(200).send(); //삭제 기능이 처리되었을 때 페이지 새로고침
         })
+        .catch(err =>{
+            console.log(err);
+            res.status(500).send(); //삭제 실패 시 예외 처리
+        })
 });

@@ -90,6 +90,8 @@
           item.parent('td').parent('tr').remove(); // 새로고침 하고 싶은 부분만 업데이트
         }).fail(function(xhr, textStatus, errorthrown){
           //응답에 실패했을 때
+          console.log('게시물 삭제 실패');
+          console.log(xhr, textStatus, errorThrown);
         });
       });
     </script>

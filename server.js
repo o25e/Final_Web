@@ -1,5 +1,6 @@
 // 서버 주소: http://localhost:8080/enter
 // http://localhost:8080/list
+// http://localhost:8080/content
 
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
@@ -125,3 +126,8 @@ app.post("/delete", function (req, res){
             res.status(500).send(); //삭제 실패 시 예외 처리
         })
 });
+
+// '/content' 요청에 대한 처리 루틴
+app.get('/content', function(req, res){
+    res.render('content.ejs');
+})

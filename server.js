@@ -1,3 +1,6 @@
+// 서버 주소: http://localhost:8080/enter
+// http://localhost:8080/list
+
 const mongoclient = require('mongodb').MongoClient;
 const url =
 'mongodb+srv://eeeon:0915@cluster0.oz5ftkr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -76,7 +79,11 @@ app.get('/list', function(req, res){
 
 // '/enter' 요청에 대한 처리 루틴
 app.get('/enter', function(req, res){
-    res.sendFile(__dirname + '/enter.html');
+    // enter.html 코드
+    // res.sendFile(__dirname + '/enter.html');
+    
+    // enter.ejs 코드
+    res.render('enter.ejs');
 });
 
 // '/save' 요청에 대한 post 방식의 처리 루틴
@@ -87,7 +94,7 @@ app.post('/save', function(req, res){
 
     //몽고DB에 데이터 저장하기
     mydb.collection('post').insertOne(
-        {title : req.body.title, content : req.body.content, date : req.body.someDate}
+        {title : req.body.title, content : req.body.content, date : req.body.someDate},
     ).then(result => {
         console.log(result);
         console.log('데이터 추가 성공');
@@ -103,6 +110,3 @@ app.post('/save', function(req, res){
     res.send('데이터 추가 성공');
     // console.log("저장완료");
 });
-
-// 서버 주소: http://localhost:8080/enter
-// http://localhost:8080/list

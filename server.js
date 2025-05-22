@@ -2,6 +2,7 @@
 // http://localhost:8080/list
 
 const mongoclient = require('mongodb').MongoClient;
+const ObjId = require('mongodb').ObjectId;
 const url =
 'mongodb+srv://eeeon:0915@cluster0.oz5ftkr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 let mydb;
@@ -109,4 +110,14 @@ app.post('/save', function(req, res){
     // });
     res.send('데이터 추가 성공');
     // console.log("저장완료");
+});
+
+app.post("/delete", function (req, res){
+    console.log(req.body._id);
+    req.body._id = new ObjId(req.body._id);
+    mydb.collection('post').deleteOne(req.body)
+        .then(result=>{
+            console.log('삭제완료');
+            res.status(200).send(); //삭제 기능이 처리되었을 때 페이지 새로고침
+        })
 });

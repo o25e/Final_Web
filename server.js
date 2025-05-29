@@ -40,6 +40,11 @@ const app = express();
 
 // body-parser 라이브러리 추가
 const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
+
+// 정적 파일 라이브러리 추가
+app.use(express.static("public"));
 
 
 //템플릿 엔진 ejs 관련 코드 추가

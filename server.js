@@ -1,5 +1,6 @@
 // 서버 주소: http://localhost:8080/enter
 // http://localhost:8080/list
+// http://localhost:8080/content
 
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
@@ -39,6 +40,11 @@ const app = express();
 
 // body-parser 라이브러리 추가
 const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
+
+// 정적 파일 라이브러리 추가
+app.use(express.static("public"));
 
 
 //템플릿 엔진 ejs 관련 코드 추가
@@ -89,16 +95,18 @@ app.get('/enter', function(req, res){
 
 // '/save' 요청에 대한 post 방식의 처리 루틴
 app.post('/save', function(req, res){
-    console.log(req.body.title);
-    console.log(req.body.content);
-    console.log(req.body.someDate);
+    const newPost = {
+        title: req.body.title,
+        content: req.body.content,
+        date: req.body.someDate
+    };
 
     //몽고DB에 데이터 저장하기
-    mydb.collection('post').insertOne(
-        {title : req.body.title, content : req.body.content, date : req.body.someDate},
-    ).then(result => {
+    mydb.collection('post').insertOne(newPost)
+    .then(result => {
         console.log(result);
         console.log('데이터 추가 성공');
+        res.redirect("/list"); // 데이저 저장 완료 시 자동으로 페이지 넘어가기
     });
 
     //MySQL DB에 데이터 저장하기
@@ -108,8 +116,26 @@ app.post('/save', function(req, res){
     //     if (err) throw err;
     //     console.log('데이터 추가 성공');
     // });
-    res.send('데이터 추가 성공');
+    // res.send('데이터 추가 성공');
+    
     // console.log("저장완료");
+});
+
+// '/edit' 요청에 대한 post 방식의 처리 루틴
+app.post('/edit', function(req, res){
+    const updateId = new ObjId(req.body.id);
+
+    //몽고DB에 데이터 저장하기
+    mydb
+        .collection('post')
+        .updateOne({_id : updateId}, {$set : {title : req.body.title, content : req.body.content, date : req.body.someDate}})
+        .then(result => {
+            console.log("수정완료");
+            res.redirect('/list');
+    })
+    .catch((err) => {
+        console.log(err);
+    });
 });
 
 app.post("/delete", function (req, res){
@@ -125,3 +151,32 @@ app.post("/delete", function (req, res){
             res.status(500).send(); //삭제 실패 시 예외 처리
         })
 });
+
+// '/content' 요청에 대한 처리 루틴
+app.get('/content/:id', function(req, res){
+    console.log(req.params.id);
+    req.params.id = new ObjId(req.params.id);
+    mydb
+        .collection("post")
+        .findOne({ _id : req.params.id })
+        .then((result) => {
+            console.log(result);
+            res.render("content.ejs", {data : result });
+        });
+});
+
+// "/edit" 요청에 대한 처리 루틴
+app.get('/edit/:id', function(req, res) {
+    req.params.id = new ObjId(req.params.id);
+    mydb
+        .collection("post")
+        .findOne({ _id: req.params.id })
+        .then((result) => {
+            console.log(result);
+            res.render("edit.ejs", {data : result });
+        });
+});
+
+app.get("/", function (req, res){
+    res.render("index.ejs");
+})

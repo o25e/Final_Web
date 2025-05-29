@@ -128,6 +128,14 @@ app.post("/delete", function (req, res){
 });
 
 // '/content' 요청에 대한 처리 루틴
-app.get('/content', function(req, res){
-    res.render('content.ejs');
-})
+app.get('/content/:id', function(req, res){
+    console.log(req.params.id);
+    req.params.id = new ObjId(req.params.id);
+    mydb
+        .collection("post")
+        .findOne({ _id : req.params.id })
+        .then((result) => {
+            console.log(result);
+            res.render("content.ejs", {data : result });
+        });
+});

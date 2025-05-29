@@ -95,16 +95,18 @@ app.get('/enter', function(req, res){
 
 // '/save' 요청에 대한 post 방식의 처리 루틴
 app.post('/save', function(req, res){
-    console.log(req.body.title);
-    console.log(req.body.content);
-    console.log(req.body.someDate);
+    const newPost = {
+        title: req.body.title,
+        content: req.body.content,
+        date: req.body.someDate
+    };
 
     //몽고DB에 데이터 저장하기
-    mydb.collection('post').insertOne(
-        {title : req.body.title, content : req.body.content, date : req.body.someDate},
-    ).then(result => {
+    mydb.collection('post').insertOne(newPost)
+    .then(result => {
         console.log(result);
         console.log('데이터 추가 성공');
+        res.redirect("/list"); // 데이저 저장 완료 시 자동으로 페이지 넘어가기
     });
 
     //MySQL DB에 데이터 저장하기
@@ -114,18 +116,19 @@ app.post('/save', function(req, res){
     //     if (err) throw err;
     //     console.log('데이터 추가 성공');
     // });
-    res.send('데이터 추가 성공');
+    // res.send('데이터 추가 성공');
+    
     // console.log("저장완료");
 });
 
 // '/edit' 요청에 대한 post 방식의 처리 루틴
-app.post('/save', function(req, res){
-    console.log(req.body);
-    req.body.id = new ObjId(req.body.id);
+app.post('/edit', function(req, res){
+    const updateId = new ObjId(req.body.id);
+
     //몽고DB에 데이터 저장하기
     mydb
         .collection('post')
-        .updateOne({_id : req.body.id}, {$set : {title : req.body.title, content : req.body.content, date : req.body.someDate}})
+        .updateOne({_id : updateId}, {$set : {title : req.body.title, content : req.body.content, date : req.body.someDate}})
         .then(result => {
             console.log("수정완료");
             res.redirect('/list');

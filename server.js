@@ -173,3 +173,7 @@ app.get('/edit/:id', function(req, res) {
             res.render("edit.ejs", {data : result });
         });
 });
+
+app.get("/", function (req, res){
+    res.render("index.ejs");
+})

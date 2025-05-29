@@ -113,6 +113,23 @@ app.post('/save', function(req, res){
     // console.log("저장완료");
 });
 
+// '/edit' 요청에 대한 post 방식의 처리 루틴
+app.post('/save', function(req, res){
+    console.log(req.body);
+    req.body.id = new ObjId(req.body.id);
+    //몽고DB에 데이터 저장하기
+    mydb
+        .collection('post')
+        .updateOne({_id : req.body.id}, {$set : {title : req.body.title, content : req.body.content, date : req.body.someDate}})
+        .then(result => {
+            console.log("수정완료");
+            res.redirect('/list');
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+});
+
 app.post("/delete", function (req, res){
     console.log(req.body._id);
     req.body._id = new ObjId(req.body._id);
@@ -137,5 +154,17 @@ app.get('/content/:id', function(req, res){
         .then((result) => {
             console.log(result);
             res.render("content.ejs", {data : result });
+        });
+});
+
+// "/edit" 요청에 대한 처리 루틴
+app.get('/edit/:id', function(req, res) {
+    req.params.id = new ObjId(req.params.id);
+    mydb
+        .collection("post")
+        .findOne({ _id: req.params.id })
+        .then((result) => {
+            console.log(result);
+            res.render("edit.ejs", {data : result });
         });
 });

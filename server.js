@@ -210,3 +210,15 @@ app.get('/session', function(req, res){
     req.session.milk = req.session.milk + 1000;
     res.send("session : " + req.session.cookie.milk + "원");
 });
+
+// 로그인 라우터 구현
+app.get("/login", function(req, res){
+    console.log("로그인 페이지");
+    res.render("login.ejs");
+});
+
+app.post("/login", funciton(req, res){
+    console.log("아이디 : " + req.body.userid);
+    console.log("비밀번호 : " + req.body.userpw);
+    res.send('로그인 되었습니다.');
+});

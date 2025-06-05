@@ -181,10 +181,32 @@ app.get("/", function (req, res){
     res.render("index.ejs");
 })
 
+// 쿠키 생성
 let cookieParser = require('cookie-parser');
 
-app.use(cookieParser());
+app.use(cookieParser('ncvka0e398423kpfd'));
 app.get('/cookie', function(req, res){
-    res.cookie('milk', '1000원');
-    res.send('product : ' + req.cookies.milk);
+    let milk = parseInt(req.signedCookies.milk) + 1000;
+    if(isNaN(milk))
+    {
+        milk = 0;
+    }
+    res.cookie('milk', milk, {signed : true});
+    res.send('product : ' + milk + '원');
+});
+
+//  세션 생성
+let session = require('express-session');
+app.use(session({
+    secret : 'dkufe8938493j4e08394u',
+    resave : false,
+    saveUninitialized : true
+}));
+
+app.get('/session', function(req, res){
+    if(isNaN(req.session.milk)){
+        req.session.milk = 0;
+    }
+    req.session.milk = req.session.milk + 1000;
+    res.send("session : " + req.session.cookie.milk + "원");
 });

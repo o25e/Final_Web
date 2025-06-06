@@ -2,10 +2,12 @@
 // http://localhost:8080/list
 // http://localhost:8080/content
 
+// 환경변수 라이브러리 사용
+const dotenv = require('dotenv').config();
+
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
-const url =
-'mongodb+srv://eeeon:0915@cluster0.oz5ftkr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const url = process.env.DB_URL;
 let mydb;
 mongoclient.connect(url)
     .then(client => {
@@ -15,7 +17,7 @@ mongoclient.connect(url)
         })
         
 
-        app.listen(8080, function(){
+        app.listen(process.env.PORT, function(){
             console.log("포트 8080으로 서버 대기중 ... ")
         });
     }).catch(err => {

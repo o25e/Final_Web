@@ -187,6 +187,9 @@ app.get('/edit/:id', function(req, res) {
         .findOne({ _id: req.params.id })
         .then((result) => {
             console.log(result);
+            if (result.path) {
+                result.path = result.path.replace(/\\public\\image\\/, "/image/");
+            }
             res.render("edit.ejs", {data : result });
         });
 });
@@ -315,4 +318,20 @@ let imagepath = '';
 app.post('/photo', upload.single('picture'), function(req, res){
     console.log("req.file.path");
     imagepath = '\\' + req.file.path;
+});
+
+// 검색 라우터
+app.get('/search', function(req, res){
+    console.log(req.query);
+    mydb
+    .collection("post")
+    .find({title: req.query.value}).toArray()
+    .then((result) => {
+        console.log(result);
+        result = result.map(post => {
+            post.path = post.path.replace(/\\public\\image\\/, "/image/");
+            return post;
+        })
+        res.render("sresult.ejs", {data: result});
+    })
 });

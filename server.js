@@ -186,8 +186,15 @@ app.get('/edit/:id', function(req, res) {
 });
 
 app.get("/", function (req, res){
-    res.render("index.ejs");
-})
+    // res.render("index.ejs");
+    if (req.session.user) {
+        console.log("세션 유지");
+        res.render("index.ejs", {user: req.session.user});
+    }else{
+        console.log("user : null");
+        res.render("index.ejs", {user : null});
+    }
+});
 
 // 쿠키 생성
 let cookieParser = require('cookie-parser');
@@ -258,3 +265,28 @@ app.get("/logout", function (req, res){
     res.render('index.ejs', {user : null});
     // res.redirect("/");
 });
+
+// 회원가입 페이지 호출 라우터
+app.get("/signup", function(req, res){
+    res.render("signup.ejs");
+});
+
+app.post("/signup", function(req, res){
+    console.log(req.body.userid);
+    console.log(req.body.userpw);
+    console.log(req.body.usergroup);
+    console.log(req.body.usermail);
+
+    mydb
+        .collection("account")
+        .insertOne({
+            userid : req.body.userid,
+            userpw : req.body.userpw,
+            usergroup : req.body.usergroup,
+            usermail : req.body.usermail,
+        })
+        .then((result) => {
+            console.log("회원가입 성공");
+        });
+    res.redirect("/");
+})

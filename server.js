@@ -37,6 +37,7 @@ conn.connect();
 
 const express = require('express');
 const app = express();
+const sha = require('sha256');
 
 // 계정 검사 인증 코드에 세션 적용
 let session = require('express-session');
@@ -246,7 +247,7 @@ app.post("/login", function(req, res){
         .collection("account")
         .findOne({userid : req.body.userid})
         .then((result) => {
-        if(result.userpw == req.body.userpw){
+        if(result.userpw == sha(req.body.userpw)){
             req.session.user = req.body;
             console.log("새로운 로그인");
             res.render('index.ejs', {user : req.session.user});
@@ -273,7 +274,7 @@ app.get("/signup", function(req, res){
 
 app.post("/signup", function(req, res){
     console.log(req.body.userid);
-    console.log(req.body.userpw);
+    console.log(sha(req.body.userpw)); // SHA 알고리즘으로 회원가입 비밀번호 암호화
     console.log(req.body.usergroup);
     console.log(req.body.usermail);
 
@@ -281,7 +282,7 @@ app.post("/signup", function(req, res){
         .collection("account")
         .insertOne({
             userid : req.body.userid,
-            userpw : req.body.userpw,
+            userpw : sha(req.body.userpw),
             usergroup : req.body.usergroup,
             usermail : req.body.usermail,
         })

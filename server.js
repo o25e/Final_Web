@@ -38,6 +38,14 @@ conn.connect();
 const express = require('express');
 const app = express();
 
+// 계정 검사 인증 코드에 세션 적용
+let session = require('express-session');
+app.use(session({
+    secret : 'dkufe8938493j4e0839u',
+    resave : false,
+    saveUninitialized : true
+}))
+
 // body-parser 라이브러리 추가
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -195,13 +203,13 @@ app.get('/cookie', function(req, res){
     res.send('product : ' + milk + '원');
 });
 
-//  세션 생성
-let session = require('express-session');
-app.use(session({
-    secret : 'dkufe8938493j4e08394u',
-    resave : false,
-    saveUninitialized : true
-}));
+// //  세션 생성
+// let session = require('express-session');
+// app.use(session({
+//     secret : 'dkufe8938493j4e08394u',
+//     resave : false,
+//     saveUninitialized : true
+// }));
 
 app.get('/session', function(req, res){
     if(isNaN(req.session.milk)){
@@ -213,12 +221,40 @@ app.get('/session', function(req, res){
 
 // 로그인 라우터 구현
 app.get("/login", function(req, res){
-    console.log("로그인 페이지");
-    res.render("login.ejs");
+    console.log(req.session);
+    if(req.session.user){
+        console.log('세션 유지');
+        res.render('index.ejs', {user : req.session.user});
+        // res.send('로그인 되었습니다.');
+    }else{
+        res.render("login.ejs");
+    }
 });
 
 app.post("/login", function(req, res){
     console.log("아이디 : " + req.body.userid);
     console.log("비밀번호 : " + req.body.userpw);
-    res.send('로그인 되었습니다.');
+
+    mydb
+        .collection("account")
+        .findOne({userid : req.body.userid})
+        .then((result) => {
+        if(result.userpw == req.body.userpw){
+            req.session.user = req.body;
+            console.log("새로운 로그인");
+            res.render('index.ejs', {user : req.session.user});
+            // res.send('로그인 되었습니다.');
+        }else{
+            res.render('login.ejs');
+            // res.send('비밀번호가 틀렸습니다.');
+        }
+    });
+});
+
+// 로그아웃 구현
+app.get("/logout", function (req, res){
+    console.log("로그아웃");
+    req.session.destroy();
+    res.render('index.ejs', {user : null});
+    // res.redirect("/");
 });

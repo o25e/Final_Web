@@ -23,7 +23,6 @@ mongoclient.connect(url)
     });
     console.log('몽고DB 접속 성공');
 
-
 // MySQL + Node.js 접속 코드
 var mysql = require("mysql");
 var conn = mysql.createConnection({
@@ -54,7 +53,6 @@ app.set("view engine", "ejs");
 
 // 정적 파일 라이브러리 추가
 app.use(express.static("public"));
-
 
 //템플릿 엔진 ejs 관련 코드 추가
 // const db = require('node-mysql/lib/db');app.use(bodyParser.urlencoded({extended:true}));
@@ -107,7 +105,8 @@ app.post('/save', function(req, res){
     const newPost = {
         title: req.body.title,
         content: req.body.content,
-        date: req.body.someDate
+        date: req.body.someDate,
+        path: imagepath
     };
 
     //몽고DB에 데이터 저장하기
@@ -170,7 +169,13 @@ app.get('/content/:id', function(req, res){
         .findOne({ _id : req.params.id })
         .then((result) => {
             console.log(result);
-            res.render("content.ejs", {data : result });
+            let imagePath = "";
+            if (result.path && result.path.trim() !== "") {
+                // 이미지 라우터 코드 변경 (이미지 경로 변경)
+                imagePath = result.path.replace(/\\public\\image\\/, "/image/");
+            }
+            res.render("content.ejs", {data: { ...result, path: imagePath}});
+            // res.render("content.ejs", {data : result });
         });
 });
 
@@ -291,3 +296,23 @@ app.post("/signup", function(req, res){
         });
     res.redirect("/");
 })
+
+// multer 라이브러리 사용
+let multer = require('multer');
+
+let storage = multer.diskStorage({
+    destination : function(req, file, done){
+        done(null, './public/image')
+    },
+    filename: function(req, file, done){
+        done(null, file.originalname)
+    }
+})
+
+let upload = multer({storage : storage});
+let imagepath = '';
+
+app.post('/photo', upload.single('picture'), function(req, res){
+    console.log("req.file.path");
+    imagepath = '\\' + req.file.path;
+});

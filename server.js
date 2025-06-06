@@ -56,145 +56,16 @@ app.set("view engine", "ejs");
 // 정적 파일 라이브러리 추가
 app.use(express.static("public"));
 
+// 라우터 분리
+app.use('/', require('./routes/post.js'))
+app.use('/', require('./routes/add.js'))
+app.use('/', require('./routes/auth.js'))
+
 //템플릿 엔진 ejs 관련 코드 추가
 // const db = require('node-mysql/lib/db');app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
 
-
-// /list 요청 시 데이터 조회 코드
-app.get('/list', function(req, res){
-    // 몽고DB연결 시 주석 처리하기
-    // conn.query("select * from post", function (err, rows, fields) {
-    //     if (err) throw err;
-    //     console.log(rows);
-    // });
-
-    // ejs 오류 코드
-    // mydb.collection('post').find().toArray(function(err, result){
-    //     console.log(result);       
-    //     // ejs 사용 코드
-    //     res.render('list.ejs', {data : result});
-    // })
-
-    mydb.collection('post').find().toArray().then(result=>{
-        console.log(result);       
-        // ejs 사용 코드
-        res.render('list.ejs', {data : result});
-    })
-});
-
-    // ejs 사용 전 데이터베이스 연결 코드
-    // res.sendFile(__dirname + '/list.html');
-
-
-
-    // console.log('데이터베이스를 조회합니다.');
-
-
-
-// '/enter' 요청에 대한 처리 루틴
-app.get('/enter', function(req, res){
-    // enter.html 코드
-    // res.sendFile(__dirname + '/enter.html');
-    
-    // enter.ejs 코드
-    res.render('enter.ejs');
-});
-
-// '/save' 요청에 대한 post 방식의 처리 루틴
-app.post('/save', function(req, res){
-    const newPost = {
-        title: req.body.title,
-        content: req.body.content,
-        date: req.body.someDate,
-        path: imagepath
-    };
-
-    //몽고DB에 데이터 저장하기
-    mydb.collection('post').insertOne(newPost)
-    .then(result => {
-        console.log(result);
-        console.log('데이터 추가 성공');
-        res.redirect("/list"); // 데이저 저장 완료 시 자동으로 페이지 넘어가기
-    });
-
-    //MySQL DB에 데이터 저장하기
-    // let sql = "insert into post (title, content, created) values(?, ?, NOW())";
-    // let params = [req.body.title, req.body.content];
-    // conn.query(sql, params, function (err, result) {
-    //     if (err) throw err;
-    //     console.log('데이터 추가 성공');
-    // });
-    // res.send('데이터 추가 성공');
-    
-    // console.log("저장완료");
-});
-
-// '/edit' 요청에 대한 post 방식의 처리 루틴
-app.post('/edit', function(req, res){
-    const updateId = new ObjId(req.body.id);
-
-    //몽고DB에 데이터 저장하기
-    mydb
-        .collection('post')
-        .updateOne({_id : updateId}, {$set : {title : req.body.title, content : req.body.content, date : req.body.someDate}})
-        .then(result => {
-            console.log("수정완료");
-            res.redirect('/list');
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-});
-
-app.post("/delete", function (req, res){
-    console.log(req.body._id);
-    req.body._id = new ObjId(req.body._id);
-    mydb.collection('post').deleteOne(req.body)
-        .then(result=>{
-            console.log('삭제완료');
-            res.status(200).send(); //삭제 기능이 처리되었을 때 페이지 새로고침
-        })
-        .catch(err =>{
-            console.log(err);
-            res.status(500).send(); //삭제 실패 시 예외 처리
-        })
-});
-
-// '/content' 요청에 대한 처리 루틴
-app.get('/content/:id', function(req, res){
-    console.log(req.params.id);
-    req.params.id = new ObjId(req.params.id);
-    mydb
-        .collection("post")
-        .findOne({ _id : req.params.id })
-        .then((result) => {
-            console.log(result);
-            let imagePath = "";
-            if (result.path && result.path.trim() !== "") {
-                // 이미지 라우터 코드 변경 (이미지 경로 변경)
-                imagePath = result.path.replace(/\\public\\image\\/, "/image/");
-            }
-            res.render("content.ejs", {data: { ...result, path: imagePath}});
-            // res.render("content.ejs", {data : result });
-        });
-});
-
-// "/edit" 요청에 대한 처리 루틴
-app.get('/edit/:id', function(req, res) {
-    req.params.id = new ObjId(req.params.id);
-    mydb
-        .collection("post")
-        .findOne({ _id: req.params.id })
-        .then((result) => {
-            console.log(result);
-            if (result.path) {
-                result.path = result.path.replace(/\\public\\image\\/, "/image/");
-            }
-            res.render("edit.ejs", {data : result });
-        });
-});
 
 app.get("/", function (req, res){
     // res.render("index.ejs");
@@ -209,17 +80,7 @@ app.get("/", function (req, res){
 
 // 쿠키 생성
 let cookieParser = require('cookie-parser');
-
 app.use(cookieParser('ncvka0e398423kpfd'));
-app.get('/cookie', function(req, res){
-    let milk = parseInt(req.signedCookies.milk) + 1000;
-    if(isNaN(milk))
-    {
-        milk = 0;
-    }
-    res.cookie('milk', milk, {signed : true});
-    res.send('product : ' + milk + '원');
-});
 
 // //  세션 생성
 // let session = require('express-session');
@@ -228,112 +89,3 @@ app.get('/cookie', function(req, res){
 //     resave : false,
 //     saveUninitialized : true
 // }));
-
-app.get('/session', function(req, res){
-    if(isNaN(req.session.milk)){
-        req.session.milk = 0;
-    }
-    req.session.milk = req.session.milk + 1000;
-    res.send("session : " + req.session.cookie.milk + "원");
-});
-
-// 로그인 라우터 구현
-app.get("/login", function(req, res){
-    console.log(req.session);
-    if(req.session.user){
-        console.log('세션 유지');
-        res.render('index.ejs', {user : req.session.user});
-        // res.send('로그인 되었습니다.');
-    }else{
-        res.render("login.ejs");
-    }
-});
-
-app.post("/login", function(req, res){
-    console.log("아이디 : " + req.body.userid);
-    console.log("비밀번호 : " + req.body.userpw);
-
-    mydb
-        .collection("account")
-        .findOne({userid : req.body.userid})
-        .then((result) => {
-        if(result.userpw == sha(req.body.userpw)){
-            req.session.user = req.body;
-            console.log("새로운 로그인");
-            res.render('index.ejs', {user : req.session.user});
-            // res.send('로그인 되었습니다.');
-        }else{
-            res.render('login.ejs');
-            // res.send('비밀번호가 틀렸습니다.');
-        }
-    });
-});
-
-// 로그아웃 구현
-app.get("/logout", function (req, res){
-    console.log("로그아웃");
-    req.session.destroy();
-    res.render('index.ejs', {user : null});
-    // res.redirect("/");
-});
-
-// 회원가입 페이지 호출 라우터
-app.get("/signup", function(req, res){
-    res.render("signup.ejs");
-});
-
-app.post("/signup", function(req, res){
-    console.log(req.body.userid);
-    console.log(sha(req.body.userpw)); // SHA 알고리즘으로 회원가입 비밀번호 암호화
-    console.log(req.body.usergroup);
-    console.log(req.body.usermail);
-
-    mydb
-        .collection("account")
-        .insertOne({
-            userid : req.body.userid,
-            userpw : sha(req.body.userpw),
-            usergroup : req.body.usergroup,
-            usermail : req.body.usermail,
-        })
-        .then((result) => {
-            console.log("회원가입 성공");
-        });
-    res.redirect("/");
-})
-
-// multer 라이브러리 사용
-let multer = require('multer');
-
-let storage = multer.diskStorage({
-    destination : function(req, file, done){
-        done(null, './public/image')
-    },
-    filename: function(req, file, done){
-        done(null, file.originalname)
-    }
-})
-
-let upload = multer({storage : storage});
-let imagepath = '';
-
-app.post('/photo', upload.single('picture'), function(req, res){
-    console.log("req.file.path");
-    imagepath = '\\' + req.file.path;
-});
-
-// 검색 라우터
-app.get('/search', function(req, res){
-    console.log(req.query);
-    mydb
-    .collection("post")
-    .find({title: req.query.value}).toArray()
-    .then((result) => {
-        console.log(result);
-        result = result.map(post => {
-            post.path = post.path.replace(/\\public\\image\\/, "/image/");
-            return post;
-        })
-        res.render("sresult.ejs", {data: result});
-    })
-});

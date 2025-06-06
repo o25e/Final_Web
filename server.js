@@ -217,7 +217,7 @@ app.get("/login", function(req, res){
     res.render("login.ejs");
 });
 
-app.post("/login", funciton(req, res){
+app.post("/login", function(req, res){
     console.log("아이디 : " + req.body.userid);
     console.log("비밀번호 : " + req.body.userpw);
     res.send('로그인 되었습니다.');

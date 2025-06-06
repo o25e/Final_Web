@@ -26,15 +26,15 @@ mongoclient.connect(url)
     console.log('몽고DB 접속 성공');
 
 // MySQL + Node.js 접속 코드
-var mysql = require("mysql");
-var conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "0915",
-    database: "myboard",
-});
+// var mysql = require("mysql");
+// var conn = mysql.createConnection({
+//     host: "localhost",
+//     user: "root",
+//     password: "0915",
+//     database: "myboard",
+// });
 
-conn.connect();
+// conn.connect();
 
 const express = require('express');
 const app = express();

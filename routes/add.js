@@ -52,6 +52,7 @@ router.post('/save', function(req, res){
 
 // multer 라이브러리 사용
 let multer = require('multer');
+const path = require('path');
 
 let storage = multer.diskStorage({
     destination : function(req, file, done){
@@ -60,15 +61,34 @@ let storage = multer.diskStorage({
     filename: function(req, file, done){
         done(null, file.originalname)
     }
-})
+});
 
 let upload = multer({storage : storage});
 let imagepath = '';
 
 // 이미지
 router.post('/photo', upload.single('picture'), function(req, res){
-    console.log("req.file.path");
-    imagepath = '\\' + req.file.path;
+    // 파일이 선택되지 않은 경우
+    if (!req.file) {
+        return res.send(`
+            <script>
+                alert("이미지를 먼저 선택해주세요.");
+                window.history.back();
+            </script>
+        `);
+    }
+    // console.log("req.file.path");
+    // imagepath = '\\' + req.file.path;
+
+    // 업로드된 파일명 추출
+    const filename = path.basename(req.file.path);
+
+    // 웹에서 접근 가능한 경로로 저장 (ex: /image/파일명)
+    imagepath = `/image/${filename}`;
+    console.log("이미지 경로:", imagepath);
+
+    // 업로드 성공 여부를 함께 전달
+    // res.render('enter.ejs', { uploaded: true , imagepath});
 });
 
 

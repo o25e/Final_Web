@@ -52,8 +52,8 @@ router.get('/content/:id', function(req, res){
             console.log(result);
             let imagePath = "";
             if (result.path && result.path.trim() !== "") {
-                // 이미지 라우터 코드 변경 (이미지 경로 변경)
-                imagePath = result.path.replace(/\\public\\image\\/, "/image/");
+                // 이미지 라우터 코드 변경 (이미지 경로 변경) -> OS 무관하게
+                imagePath = result.path.replace(/(\\|\/)?public(\\|\/)image(\\|\/)?/, "/image/");
             }
             res.render("content.ejs", {data: { ...result, path: imagePath}});
             // res.render("content.ejs", {data : result });
@@ -69,7 +69,7 @@ router.get('/edit/:id', function(req, res) {
         .then((result) => {
             console.log(result);
             if (result.path) {
-                result.path = result.path.replace(/\\public\\image\\/, "/image/");
+                result.path = result.path.replace(/(\\|\/)?public(\\|\/)image(\\|\/)?/, "/image/");
             }
             res.render("edit.ejs", {data : result });
         });

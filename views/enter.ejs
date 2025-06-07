@@ -9,6 +9,12 @@
   <body>
     <!--메뉴 파일 불러오기-->
     <%- include('menu.html')%>
+    <!-- 이미지 첨부 시 알림 추가 -->
+    <!-- <% if (typeof uploaded !== 'undefined' && uploaded) { %>
+      <script>
+          alert("이미지 첨부 완료");
+      </script>
+    <% } %> -->
       <div class ="container mt-4">
         <form action="/save" method="post">
           <div class = "form-group">

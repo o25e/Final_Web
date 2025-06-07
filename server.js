@@ -11,6 +11,7 @@ const sha = require('sha256');
 let mydb;
 mongoclient.connect(url)
     .then(client => {
+        console.log('몽고DB 접속 성공');
         mydb = client.db('myboard');
         mydb.collection('post').find().toArray().then(result => {
             console.log(result);
@@ -23,7 +24,6 @@ mongoclient.connect(url)
     }).catch(err => {
         console.log(err);
     });
-    console.log('몽고DB 접속 성공');
 
 // MySQL + Node.js 접속 코드
 // var mysql = require("mysql");

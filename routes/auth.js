@@ -3,24 +3,16 @@ var router = require('express').Router();
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
 const url = process.env.DB_URL;
+
 let mydb;
 mongoclient.connect(url)
     .then(client => {
         mydb = client.db('myboard');
-        mydb.collection('post').find().toArray().then(result => {
-            console.log(result);
-        })
-        
-
-        app.listen(process.env.PORT, function(){
-            console.log("포트 8080으로 서버 대기중 ... ")
-        });
     }).catch(err => {
         console.log(err);
     });
 
 const sha = require('sha256');
-
 // 계정 검사 인증 코드에 세션 적용
 let session = require('express-session');
 router.use(session({
@@ -49,13 +41,14 @@ router.post("/login", function(req, res){
         .collection("account")
         .findOne({userid : req.body.userid})
         .then((result) => {
-        if(result.userpw == sha(req.body.userpw)){
+        if(result && result.userpw == sha(req.body.userpw)){
             req.session.user = req.body;
-            console.log("새로운 로그인");
+            console.log("로그인 성공");
             res.render('index.ejs', {user : req.session.user});
             // res.send('로그인 되었습니다.');
         }else{
-            res.render('login.ejs');
+            console.log("로그인 실패");
+            res.render('login.ejs', {error : "아이디 또는 비밀번호가 올바르지 않습니다."});
             // res.send('비밀번호가 틀렸습니다.');
         }
     });
@@ -75,6 +68,16 @@ router.get("/signup", function(req, res){
 });
 
 router.post("/signup", function(req, res){
+    // + 모든 입력란 채우도록 하기
+    const userid = req.body.userid.trim();
+    const userpw = req.body.userpw.trim();
+    const usergroup = req.body.usergroup.trim();
+    const usermail = req.body.usermail.trim();
+
+    if (!userid || !userpw || !usergroup || !usermail) {
+        return res.render("signup.ejs", { error: "모든 항목을 반드시 채워주세요." });
+    }
+
     console.log(req.body.userid);
     console.log(sha(req.body.userpw)); // SHA 알고리즘으로 회원가입 비밀번호 암호화
     console.log(req.body.usergroup);
@@ -83,34 +86,15 @@ router.post("/signup", function(req, res){
     mydb
         .collection("account")
         .insertOne({
-            userid : req.body.userid,
-            userpw : sha(req.body.userpw),
-            usergroup : req.body.usergroup,
-            usermail : req.body.usermail,
+            userid : userid,
+            userpw : sha(userpw),
+            usergroup : usergroup,
+            usermail : usermail,
         })
         .then((result) => {
             console.log("회원가입 성공");
         });
     res.redirect("/");
-})
-
-// 쿠키 라우터
-router.get('/cookie', function(req, res){
-    let milk = parseInt(req.signedCookies.milk) + 1000;
-    if(isNaN(milk))
-    {
-        milk = 0;
-    }
-    res.cookie('milk', milk, {signed : true});
-    res.send('product : ' + milk + '원');
-});
-
-router.get('/session', function(req, res){
-    if(isNaN(req.session.milk)){
-        req.session.milk = 0;
-    }
-    req.session.milk = req.session.milk + 1000;
-    res.send("session : " + req.session.cookie.milk + "원");
 });
 
 // router 변수 외부로 노출시키기

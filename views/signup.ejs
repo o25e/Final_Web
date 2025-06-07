@@ -9,6 +9,12 @@
   <body>
     <!--메뉴 파일 불러오기-->
     <%- include('menu.html')%>
+    <!-- 에러 메시지 출력 및 alert 띄우기 -->
+    <% if (typeof error !== 'undefined') { %>
+      <script>
+          alert("<%= error %>");
+      </script>
+    <% } %>
     <div class = "container mt-4">
         <form action = "/signup" method = "post">
             <div class = "form-group">

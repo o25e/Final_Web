@@ -1,13 +1,13 @@
-// 서버 주소: http://localhost:8080/enter
-// http://localhost:8080/list
-// http://localhost:8080/content
-
 // 환경변수 라이브러리 사용
 const dotenv = require('dotenv').config();
 
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
 const url = process.env.DB_URL;
+const express = require('express');
+const app = express();
+const sha = require('sha256');
+
 let mydb;
 mongoclient.connect(url)
     .then(client => {
@@ -35,18 +35,6 @@ mongoclient.connect(url)
 // });
 
 // conn.connect();
-
-const express = require('express');
-const app = express();
-const sha = require('sha256');
-
-// 계정 검사 인증 코드에 세션 적용
-let session = require('express-session');
-app.use(session({
-    secret : 'dkufe8938493j4e0839u',
-    resave : false,
-    saveUninitialized : true
-}))
 
 // body-parser 라이브러리 추가
 const bodyParser = require('body-parser');
@@ -81,6 +69,26 @@ app.get("/", function (req, res){
 // 쿠키 생성
 let cookieParser = require('cookie-parser');
 app.use(cookieParser('ncvka0e398423kpfd'));
+
+// 쿠키 라우터
+app.get('/cookie', function(req, res){
+    let milk = parseInt(req.signedCookies.milk) + 1000;
+    if(isNaN(milk))
+    {
+        milk = 0;
+    }
+    res.cookie('milk', milk, {signed : true});
+    res.send('product : ' + milk + '원');
+});
+
+app.get('/session', function(req, res){
+    if(isNaN(req.session.milk)){
+        req.session.milk = 0;
+    }
+    req.session.milk = req.session.milk + 1000;
+    res.send("session : " + req.session.cookie.milk + "원");
+});
+
 
 // //  세션 생성
 // let session = require('express-session');

@@ -35,6 +35,7 @@ router.post('/save', function(req, res){
     .then(result => {
         console.log(result);
         console.log('데이터 추가 성공');
+        imagepath = '';  // 저장 후 이미지 경로 초기화
         res.redirect("/list"); // 데이저 저장 완료 시 자동으로 페이지 넘어가기
     });
 

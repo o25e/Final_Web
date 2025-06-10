@@ -5,6 +5,7 @@
     "main": "server.js",
     "dependencies": {
         "body-parser": "^2.2.0",
+        "cloudinary": "^2.6.1",
         "cookie-parser": "^1.4.7",
         "dotenv": "^16.5.0",
         "ejs": "^3.1.10",
@@ -12,6 +13,7 @@
         "express-session": "^1.18.1",
         "mongodb": "^6.15.0",
         "multer": "^2.0.1",
+        "multer-storage-cloudinary": "^4.0.0",
         "node-mysql": "^0.4.2",
         "sha256": "^0.2.0"
     },

@@ -1,4 +1,5 @@
 var router = require('express').Router();
+// const multer = require('multer');
 
 const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
@@ -27,7 +28,7 @@ router.post('/save', function(req, res){
         title: req.body.title,
         content: req.body.content,
         date: req.body.someDate,
-        path: imagepath
+        path: imagepath // Clouinary의 URL
     };
 
     //몽고DB에 데이터 저장하기
@@ -52,19 +53,45 @@ router.post('/save', function(req, res){
 });
 
 // multer 라이브러리 사용
-let multer = require('multer');
-const path = require('path');
+// let multer = require('multer');
+// const path = require('path');
 
-let storage = multer.diskStorage({
-    destination : function(req, file, done){
-        done(null, './public/image')
-    },
-    filename: function(req, file, done){
-        done(null, file.originalname)
-    }
+// let storage = multer.diskStorage({
+//     destination : function(req, file, done){
+//         done(null, './public/image')
+//     },
+//     filename: function(req, file, done){
+//         done(null, file.originalname)
+//     }
+// });
+
+// let upload = multer({storage : storage});
+// let imagepath = '';
+
+// .env 파일 로드
+require('dotenv').config();
+
+// Cloudinary 설정
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-let upload = multer({storage : storage});
+// Multer에 Cloudinary Storage 연결
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'myapp_images', // Cloudinary에 저장할 폴더 이름
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+  },
+});
+
+const upload = multer({ storage: storage });
+
 let imagepath = '';
 
 // 이미지
@@ -85,8 +112,12 @@ router.post('/photo', upload.single('picture'), function(req, res){
     const filename = path.basename(req.file.path);
 
     // 웹에서 접근 가능한 경로로 저장 (ex: /image/파일명)
-    imagepath = `/image/${filename}`;
-    console.log("이미지 경로:", imagepath);
+    // imagepath = `/image/${filename}`;
+    // console.log("이미지 경로:", imagepath);
+
+    // Cloudinary로부터 받은 URL 저장
+    imagepath = req.file.path; // Cloudinary가 자동으로 생성한 URL
+    console.log("클라우드 이미지 경로:", imagepath);
 
     // 업로드 성공 여부를 함께 전달
     // res.render('enter.ejs', { uploaded: true , imagepath});
